@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinTrack - Smart Financial Calculator & Analytics</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Chart.js for Interactive Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- jsPDF & html2canvas for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #0f172a;
+            --text-muted: #64748b;
+            --nav-border: #e2e8f0;
+            --box-border: #cbd5e1;
+            --result-bg: #f1f5f9;
+            --input-border: #cbd5e1;
+            --tab-inactive: #e2e8f0;
+            --primary: #059669;
+            --primary-hover: #047857;
+            --dark-navy: #0f172a;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #090d16;
+            --card-bg: #111827;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --nav-border: #1f2937;
+            --box-border: #1f2937;
+            --result-bg: #1f2937;
+            --input-border: #374151;
+            --tab-inactive: #1f2937;
+        }
+
+        body {
+            font-family: "Inter", Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar {
+            height: 75px;
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8%;
+            border-bottom: 1px solid var(--nav-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo, .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-color);
+            letter-spacing: -0.5px;
+            text-decoration: none;
+        }
+
+        .logo svg, .footer-logo svg {
+            width: 34px;
+            height: 42px;
+        }
+
+        .logo span, .footer-logo span {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--nav-border);
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+        }
+
+        .nav-button {
+            border: none;
+            background: var(--primary);
+            color: white;
+            padding: 11px 22px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .nav-button:hover {
+            background: var(--primary-hover);
+        }
+
+        /* ================= HERO ================= */
+        .hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 90px 8%;
+        }
+
+        .hero-content {
+            max-width: 1100px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .small-title {
+            color: #34d399;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .hero h1 {
+            font-size: 46px;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .hero h1 span {
+            color: #34d399;
+        }
+
+        .hero-description {
+            color: #cbd5e1;
+            line-height: 1.7;
+            max-width: 540px;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        .hero-button {
+            border: none;
+            background: var(--primary);
+            color: white;
+            padding: 15px 28px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+
+        .hero-button:hover {
+            background: var(--primary-hover);
+        }
+
+        /* ================= HERO CARD ================= */
+        .hero-card {
+            background: #ffffff;
+            color: #0f172a;
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .status {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .balance {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .balance-text {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        .mini-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .mini-cards div {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .mini-cards small {
+            display: block;
+            color: #64748b;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+
+        .green {
+            color: var(--primary);
+        }
+
+        /* ================= CALCULATORS ================= */
+        .calculators {
+            max-width: 1100px;
+            margin: auto;
+            padding: 85px 20px 60px;
+        }
+
+        .section-heading {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .section-heading h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .section-heading > p:last-child {
+            color: var(--text-muted);
+        }
+
+        /* ================= TABS ================= */
+        .calculator-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 0;
+        }
+
+        .tab-button {
+            border: none;
+            background: var(--tab-inactive);
+            color: var(--text-muted);
+            padding: 12px 18px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button.active {
+            background: var(--card-bg);
+            color: var(--primary);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ================= CALCULATOR BOX ================= */
+        .calculator-box {
+            display: none;
+            background: var(--card-bg);
+            padding: 35px;
+            border-radius: 0 14px 14px 14px;
+            box-shadow: 0 10px 35px rgba(15, 23, 42, 0.08);
+            border: 1px solid var(--nav-border);
+        }
+
+        .calculator-box.active {
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            gap: 40px;
+        }
+
+        /* ================= INFO ================= */
+        .calculator-info {
+            background: var(--result-bg);
+            padding: 28px;
+            border-radius: 12px;
+            border: 1px solid var(--box-border);
+        }
+
+        .calculator-info h3 {
+            font-size: 22px;
+            margin: 18px 0 10px;
+            font-weight: 700;
+        }
+
+        .calculator-info p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .green-icon { background: #059669; }
+        .purple-icon { background: #7c3aed; }
+        .amber-icon { background: #d97706; }
+
+        /* ================= FORM ================= */
+        .calculator-form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .calculator-form label {
+            margin-top: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .calculator-form label span {
+            color: var(--primary);
+            float: right;
+        }
+
+        .calculator-form input, .calculator-form select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--input-border);
+            background: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            margin-bottom: 6px;
+        }
+
+        .calculator-form input:focus, .calculator-form select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+        }
+
+        .calculate-button {
+            border: none;
+            background: var(--dark-navy);
+            color: white;
+            padding: 14px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .calculate-button:hover {
+            background: var(--primary);
+        }
+
+        /* ================= RESULT ================= */
+        .result-box {
+            grid-column: 1 / -1;
+            background: var(--result-bg);
+            border: 1px solid var(--box-border);
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .export-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .export-button:hover {
+            background: var(--primary-hover);
+        }
+
+        .result-title {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .result-main {
+            font-size: 32px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .result-box > p:not(.result-title) {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .fd-results {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .result-details div {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--box-border);
+        }
+
+        .result-details small {
+            display: block;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+
+        .result-details strong {
+            color: var(--text-color);
+            font-size: 17px;
+        }
+
+        .chart-container {
+            max-width: 360px;
+            max-height: 280px;
+            margin: 25px auto 0 auto;
+            position: relative;
+        }
+
+        /* ================= FEATURES ================= */
+        .features {
+            background: var(--card-bg);
+            padding: 80px 8%;
+            border-top: 1px solid var(--nav-border);
+        }
+
+        .feature-grid {
+            max-width: 1000px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .feature-card {
+            text-align: left;
+            padding: 30px;
+            border: 1px solid var(--box-border);
+            border-radius: 12px;
+            background: var(--card-bg);
+        }
+
+        .feature-icon {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* ================= ABOUT EXPANDED ================= */
+        .about-detailed {
+            max-width: 1000px;
+            margin: 50px auto 0 auto;
+            line-height: 1.7;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        .about-detailed h3 {
+            color: var(--text-color);
+            margin: 25px 0 10px 0;
+            font-size: 20px;
+        }
+
+        /* ================= FOOTER ================= */
+        footer {
+            background: var(--dark-navy);
+            color: #cbd5e1;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        footer .footer-logo {
+            justify-content: center;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .copyright {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 850px) {
+            .navbar { padding: 0 20px; }
+            .nav-links { display: none; }
+            .hero { padding: 60px 20px; }
+            .hero-content { grid-template-columns: 1fr; gap: 40px; }
+            .hero h1 { font-size: 34px; }
+            .calculator-box.active { grid-template-columns: 1fr; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .fd-results { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 550px) {
+            .calculator-tabs { flex-direction: column; }
+            .tab-button { border-radius: 8px; }
+            .calculator-box { border-radius: 12px; padding: 20px; }
+            .result-details { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 28px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SVG GRADIENT DEFINITIONS FOR LOGO "F" -->
+    <svg width="0" height="0" style="position:absolute;">
+        <defs>
+            <linearGradient id="fTopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0284c7" />
+                <stop offset="50%" stop-color="#0d9488" />
+                <stop offset="100%" stop-color="#86efac" />
+            </linearGradient>
+
+            <linearGradient id="fBottomGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#030712" />
+                <stop offset="45%" stop-color="#0f172a" />
+                <stop offset="85%" stop-color="#0284c7" />
+                <stop offset="100%" stop-color="#0d9488" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <!-- ================= NAVBAR ================= -->
+    <nav class="navbar">
+        <a href="#home" class="logo">
+            <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 22 28 C 46 8, 80 12, 94 22 C 70 26, 44 38, 28 62 C 26 44, 22 32, 22 28 Z" fill="url(#fTopGrad)" />
+                <path d="M 22 28 C 28 50, 20 84, 34 102 C 40 84, 35 58, 54 44 C 40 46, 28 38, 22 28 Z" fill="url(#fBottomGrad)" />
+            </svg>
+            <div>Fin<span>Track</span></div>
+        </a>
+
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#calculators">Calculators</a>
+            <a href="#about">About</a>
+        </div>
+
+        <div class="nav-actions">
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌙</button>
+            <button class="nav-button" onclick="scrollToCalculators()">Get Started</button>
+        </div>
+    </nav>
+
+
+    <!-- ================= HERO ================= -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="hero-text">
+                <p class="small-title">SMART FINANCIAL PLANNING</p>
+                <h1>Take Control of Your <span>Financial Future</span></h1>
+                <p class="hero-description">
+                    Plan wealth growth, loan prepayments, emergency savings, and retirement projections using interactive real-time calculators.
+                </p>
+                <button class="hero-button" onclick="scrollToCalculators()">Start Calculating →</button>
+            </div>
+
+            <div class="hero-card">
+                <div class="card-header">
+                    <span>Financial Overview</span>
+                    <span class="status">● Active Engine</span>
+                </div>
+                <div class="balance">₹0</div>
+                <p class="balance-text">Sample Wealth Model</p>
+
+                <div class="mini-cards">
+                    <div>
+                        <small>Avg SIP Return</small>
+                        <strong>0%</strong>
+                    </div>
+                    <div>
+                        <small>Wealth Growth</small>
+                        <strong class="green">+0%</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ================= CALCULATORS ================= -->
+    <section class="calculators" id="calculators">
+        <div class="section-heading">
+            <p class="small-title">FINANCIAL SUITE</p>
+            <h2>Choose Your Calculator</h2>
+            <p>Select a tool below to analyze your finances with dynamic visual charts.</p>
+        </div>
+
+        <!-- TABS -->
+        <div class="calculator-tabs">
+            <button class="tab-button active" onclick="showCalculator('emi', this)">EMI</button>
+            <button class="tab-button" onclick="showCalculator('fd', this)">FD</button>
+            <button class="tab-button" onclick="showCalculator('savings', this)">Savings Goal</button>
+            <button class="tab-button" onclick="showCalculator('sip', this)">SIP & Mutual Funds</button>
+            <button class="tab-button" onclick="showCalculator('emergency', this)">Emergency Fund</button>
+            <button class="tab-button" onclick="showCalculator('fire', this)">Retirement / FIRE</button>
+        </div>
+
+
+        <!-- ================= EMI ================= -->
+        <div class="calculator-box active" id="emi">
+            <div class="calculator-info">
+                <div class="icon">₹</div>
+                <h3>EMI Calculator</h3>
+                <p>Calculate monthly loan payments, interest distribution, and simulate early prepayments.</p>
+            </div>
+
+            <div class="calculator-form">
+                <label>Loan Amount <span>₹</span></label>
+                <input type="number" id="loanAmount" placeholder="Enter loan amount" value="0">
+
+                <label>Interest Rate <span>%</span></label>
+                <input type="number" id="loanRate" placeholder="Example: 8.5" step="0.01" value="0">
+
+                <label>Loan Period <span>Years</span></label>
+                <input type="number" id="loanYears" placeholder="Example: 5" value="0">
+
+                <label>Extra Monthly Prepayment (Optional) <span>₹</span></label>
+                <input type="number" id="prepayment" placeholder="Example: 2000" value="0">
+
+                <button class="calculate-button" onclick="calculateEMI()">Calculate EMI</button>
+            </div>
+
+            <div class="result-box" id="emiResult">
+                <div class="result-header">
+                    <div>
+                        <p class="result-title">Your Monthly EMI</p>
+                        <div class="result-main" id="emiMain">₹0.00</div>
+                    </div>
+                    <button class="export-button" onclick="exportPDF('emi')">📥 Export PDF</button>
+                </div>
+
+                <div class="result-details">
+                    <div>
+                        <small>Total Interest</small>
+                        <strong id="totalInterest">₹0.00</strong>
+                    </div>
+                    <div>
+                        <small>Total Repayment</small>
+                        <strong id="totalPayment">₹0.00</strong>
+                    </div>
+                    <div>
+                        <small>Prepayment Savings</small>
+                        <strong id="prepaymentSavings">₹0.00</strong>
+                    </div>
+                    <div>
+                        <small>Tenure Reduced</small>
+                        <strong id="tenureReduced">0 Months</strong>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="emiChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= FD ================= -->
+        <div class="calculator-box" id="fd">
+            <div class="calculator-info">
+                <div class="icon green-icon">FD</div>
+                <h3>Fixed Deposit Calculator</h3>
+                <p>Determine maturity returns and measure real wealth growth against inflation.</p>
+            </div>
+
+            <div class="calculator-form">
+                <label>Deposit Amount <span>₹</span></label>
+                <input type="number" id="fdAmount" placeholder="Enter deposit amount" value="0">
+
+                <label>Interest Rate <span>%</span></label>
+                <input type="number" id="fdRate" placeholder="Example: 7" step="0.01" value="0">
+
+                <label>FD Period <span>Years</span></label>
+                <input type="number" id="fdYears" placeholder="Example: 3" step="0.5" value="0">
+
+                <label>Expected Inflation Rate <span>%</span></label>
+                <input type="number" id="fdInflation" placeholder="Example: 6" step="0.1" value="0">
+
+                <button class="calculate-button" onclick="calculateFD()">Calculate FD</button>
+            </div>
+
+            <div class="result-box" id="fdResult">
+                <div class="result-header">
+                    <div>
+                        <p class="result-title">Maturity Value</p>
+                        <div class="result-main" id="fdMaturityMain">₹0.00</div>
+                    </div>
+                    <button class="export-button" onclick="exportPDF('fd')">📥 Export PDF</button>
+                </div>
+
+                <div class="result-details fd-results">
+                    <div>
+                        <small>Principal Amount</small>
+                        <strong id="fdPrincipal">₹0.00</strong>
+                    </div>
+                    <div>
+                        <small>Interest Earned</small>
+                        <strong id="fdInterest">₹0.00</strong>
+                    </div>
+                    <div>
+                        <small>Inflation-Adjusted Purchasing Value</small>
+                        <strong id="fdInflationAdjusted">₹0.00</strong>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="fdChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= SAVINGS GOAL ================= -->
+        <div class="calculator-box" id="savings">
+            <div class="calculator-info">
+                <div class="icon purple-icon">🎯</div>
+                <h3>Savings Goal Calculator</h3>
+                <p>Plan specific savings milestones and compute the months required to reach them.</p>
+            </div>
+
+            <div class="calculator-form">
+                <label>Target Amount <span>₹</span></label>
+                <input type="number" id="targetAmount" placeholder="Example: 100000" value="0">
+
+                <label>Current Savings <span>₹</span></label>
+                <input type="number" id="currentSavings" placeholder="Example: 20000" value="0">
+
+                <label>Monthly Contribution <span>₹</span></label>
+                <input type="number" id="monthlySavings" placeholder="Example: 5000" value="0">
+
+                <button class="calculate-button" onclick="calculateSavingsGoal()">Calculate Time Required</button>
+            </div>
+
+            <div class="result-box" id="savingsResult">
+                <div class="result-header">
+                    <div>
+                        <p class="result-title">Estimated Time Horizon</p>
+                        <div class="result-main" id="savingsTargetMain">0 Months</div>
+                    </div>
+                    <button class="export-button" onclick="exportPDF('savings')">📥 Export PDF</button>
+                </div>
+
+                <div class="result-details">
+                    <div>
+                        <small>Remaining Target</small>
+                        <strong id="remainingAmount">₹0.00</strong>
+                    </div>
+                    <div>
+                        <small>Time Required</small>
+                        <strong id="requiredMonths">0 Months</strong>
+                    </div>
+                    <div>
+                        <small>Time in Years</small>
+                        <strong id="requiredYears">0 Years</strong>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="savingsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= SIP CALCULATOR ================= -->
+        <div class="calculator-box" id="sip">
+            <div class="calculator-info">
+                <div class="icon green-icon">📈</div>
+                <h3>SIP & Mutual Fund Calculator</h3>
+                <p>Calculate future compound returns on Systematic Investment Plans (SIP) in equity/mutual funds.</p>
+            </div>
+
+            <div class="calculator-form">
+                <label>Monthly Investment <span>₹</span></label>
+                <input type="number" id="sipMonthly" placeholder="Example: 5000" value="0">
+
+                <label>Expected Annual Return Rate <span>%</span></label>
+                <input type="number" id="sipRate" placeholder="Example: 12" step="0.1" value="0">
+
+                <label>Investment Tenure <span>Years</span></label>
+                <input type="number" id="sipYears" placeholder="Example: 10" value="0">
+
+                <button class="calculate-button" onclick="calculateSIP()">Calculate Wealth</button>
+            </div>
+
+            <div class="result-box" id="sipResult">
+                <div class="result-header">
+                    <div>
+                        <p class="result-title">Expected Wealth Corpus</p>
+                        <div class="result-main" id="sipMaturityMain">₹0.00</div>
+                    </div>
+                    <button class="export-button" onclick="exportPDF('sip')">📥 Export PDF</button>
+                </div>
+
+                <div class="result-details fd-results">
+                    <div>
+                        <small>Total Invested</small>
+                        <strong id="sipInvested">₹0.00</strong>
+                    </div>
+                    <div>
+                        <small>Estimated Wealth Gain</small>
+                        <strong id="sipReturns">₹0.00</strong>
+                    </div>
+                    <div>
+                        <small>Total Portfolio Value</small>
+                        <strong id="sipTotal">₹0.00</strong>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="sipChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= EMERGENCY FUND PLANNER ================= -->
+        <div class="calculator-box" id="emergency">
+            <div class="calculator-info">
+                <div class="icon amber-icon">🛡️</div>
+                <h3>Emergency Fund Planner</h3>
+                <p>Compute the ideal liquid financial cushion based on monthly expenses and job stability risk.</p>
+            </div>
+
+            <div class="calculator-form">
+                <label>Monthly Expenses <span>₹</span></label>
+                <input type="number" id="emergencyExpense" placeholder="Example: 30000" value="0">
+
+                <label>Coverage Duration <span>Months</span></label>
+                <select id="emergencyMonths">
+                    <option value="3">3 Months (Stable salaried)</option>
+                    <option value="6" selected>6 Months (Balanced safety)</option>
+                    <option value="9">9 Months (Freelance / Variable)</option>
+                    <option value="12">12 Months (High precaution)</option>
+                </select>
+
+                <label>Existing Emergency Savings <span>₹</span></label>
+                <input type="number" id="emergencyCurrent" placeholder="Example: 50000" value="0">
+
+                <button class="calculate-button" onclick="calculateEmergencyFund()">Calculate Safety Net</button>
+            </div>
+
+            <div class="result-box" id="emergencyResult">
+                <div class="result-header">
+                    <div>
+                        <p class="result-title">Required Emergency Fund</p>
+                        <div class="result-main" id="emergencyTargetMain">₹0.00</div>
+                    </div>
+                    <button class="export-button" onclick="exportPDF('emergency')">📥 Export PDF</button>
+                </div>
+
+                <div class="result-details fd-results">
+                    <div>
+                        <small>Recommended Fund</small>
+                        <strong id="emergencyTotalReq">₹0.00</strong>
+                    </div>
+                    <div>
+                        <small>Current Reserve</small>
+                        <strong id="emergencyCurrentVal">₹0.00</strong>
+                    </div>
+                    <div>
+                        <small>Additional Savings Needed</small>
+                        <strong id="emergencyDeficit">₹0.00</strong>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="emergencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= RETIREMENT / FIRE ================= -->
+        <div class="calculator-box" id="fire">
+            <div class="calculator-info">
+                <div class="icon purple-icon">🔥</div>
+                <h3>Retirement / FIRE Calculator</h3>
+                <p>Calculate your retirement corpus requirements using inflation adjustment and the 4% safe withdrawal rule.</p>
+            </div>
+
+            <div class="calculator-form">
+                <label>Current Age <span>Years</span></label>
+                <input type="number" id="fireCurrentAge" placeholder="Example: 25" value="0">
+
+                <label>Target Retirement Age <span>Years</span></label>
+                <input type="number" id="fireRetireAge" placeholder="Example: 55" value="0">
+
+                <label>Current Monthly Spending <span>₹</span></label>
+                <input type="number" id="fireSpending" placeholder="Example: 40000" value="0">
+
+                <label>Expected Inflation Rate <span>%</span></label>
+                <input type="number" id="fireInflation" placeholder="Example: 6" step="0.1" value="0">
+
+                <button class="calculate-button" onclick="calculateFIRE()">Calculate Target Corpus</button>
+            </div>
+
+            <div class="result-box" id="fireResult">
+                <div class="result-header">
+                    <div>
+                        <p class="result-title">Target Corpus Needed</p>
+                        <div class="result-main" id="fireCorpusMain">₹0.00</div>
+                    </div>
+                    <button class="export-button" onclick="exportPDF('fire')">📥 Export PDF</button>
+                </div>
+
+                <div class="result-details fd-results">
+                    <div>
+                        <small>Years to Retirement</small>
+                        <strong id="fireYearsToRetire">0 Years</strong>
+                    </div>
+                    <div>
+                        <small>Future Monthly Spending</small>
+                        <strong id="fireFutureMonthly">₹0.00</strong>
+                    </div>
+                    <div>
+                        <small>Required Nest Egg Corpus</small>
+                        <strong id="fireCorpus">₹0.00</strong>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="fireChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ================= FEATURES ================= -->
+    <section class="features" id="about">
+        <div class="section-heading">
+            <p class="small-title">WHY FINTRACK?</p>
+            <h2>Empowering Smarter Decisions</h2>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Client-Side Speed</h3>
+                <p>Calculations execute instantly in your browser without lag or unnecessary server round-trips.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Visual Wealth Split</h3>
+                <p>Interactive Chart.js visualizations break down total investment principal vs compound interest gain.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Privacy First</h3>
+                <p>Zero data collection. Your financial details remain entirely private inside your local session.</p>
+            </div>
+        </div>
+
+        <div class="about-detailed">
+            <h3>About FinTrack Engine</h3>
+            <p>
+                FinTrack is a personal finance suite designed to turn static financial math into actionable visual plans.
+                Whether you are evaluating home loan prepayments, structuring mutual fund SIPs, or working toward early retirement, FinTrack standardizes complex compound interest and inflation dynamics into intuitive tools.
+            </p>
+        </div>
+    </section>
+
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <a href="#home" class="footer-logo">
+            <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 22 28 C 46 8, 80 12, 94 22 C 70 26, 44 38, 28 62 C 26 44, 22 32, 22 28 Z" fill="url(#fTopGrad)" />
+                <path d="M 22 28 C 28 50, 20 84, 34 102 C 40 84, 35 58, 54 44 C 40 46, 28 38, 22 28 Z" fill="#ffffff" />
+            </svg>
+            <div>Fin<span>Track</span></div>
+        </a>
+        <p>Smart financial calculations made simple.</p>
+        <p class="copyright">© 2026 FinTrack. Educational & Decision Support Project.</p>
+    </footer>
+
+
+    <script>
+        // Global Chart instances
+        let emiChartInstance = null;
+        let fdChartInstance = null;
+        let savingsChartInstance = null;
+        let sipChartInstance = null;
+        let emergencyChartInstance = null;
+        let fireChartInstance = null;
+
+        // Preload 'F' Logo Image for Chart Center Drawing
+        const chartCenterLogo = new Image();
+        chartCenterLogo.src = 'data:image/svg+xml;utf8,<svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 22 28 C 46 8, 80 12, 94 22 C 70 26, 44 38, 28 62 C 26 44, 22 32, 22 28 Z" fill="%230284c7" /><path d="M 22 28 C 28 50, 20 84, 34 102 C 40 84, 35 58, 54 44 C 40 46, 28 38, 22 28 Z" fill="%230f172a" /></svg>';
+
+        // Chart.js Plugin to draw the "F" logo inside doughnut chart centers
+        const centerLogoPlugin = {
+            id: 'centerLogo',
+            afterDraw(chart) {
+                if (chart.config.type === 'doughnut') {
+                    const { ctx, chartArea: { top, bottom, left, right } } = chart;
+                    const centerX = (left + right) / 2;
+                    const centerY = (top + bottom) / 2 - 10;
+                    const size = 32;
+
+                    if (chartCenterLogo.complete) {
+                        ctx.save();
+                        ctx.drawImage(chartCenterLogo, centerX - size / 2, centerY - size / 2, size, size * 1.2);
+                        ctx.restore();
+                    } else {
+                        chartCenterLogo.onload = () => chart.draw();
+                    }
+                }
+            }
+        };
+
+        // Register Chart.js Plugin
+        Chart.register(centerLogoPlugin);
+
+        // On Page Load
+        document.addEventListener("DOMContentLoaded", function () {
+            calculateEMI();
+        });
+
+        // Format Currency
+        function formatMoney(amount) {
+            return "₹" + Number(amount).toLocaleString("en-IN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        // Scroll
+        function scrollToCalculators() {
+            document.getElementById("calculators").scrollIntoView({ behavior: "smooth" });
+        }
+
+        // Dark Mode Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const themeBtn = document.getElementById("themeToggle");
+            if (body.getAttribute("data-theme") === "dark") {
+                body.removeAttribute("data-theme");
+                themeBtn.textContent = "🌙";
+            } else {
+                body.setAttribute("data-theme", "dark");
+                themeBtn.textContent = "☀️";
+            }
+        }
+
+        // Tab Switching
+        function showCalculator(calculatorId, button) {
+            document.querySelectorAll(".calculator-box").forEach(calc => calc.classList.remove("active"));
+            document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+
+            document.getElementById(calculatorId).classList.add("active");
+            button.classList.add("active");
+
+            if (calculatorId === "emi") calculateEMI();
+            if (calculatorId === "fd") calculateFD();
+            if (calculatorId === "savings") calculateSavingsGoal();
+            if (calculatorId === "sip") calculateSIP();
+            if (calculatorId === "emergency") calculateEmergencyFund();
+            if (calculatorId === "fire") calculateFIRE();
+        }
+
+        // ================= EMI CALCULATOR =================
+        function calculateEMI() {
+            const principal = Number(document.getElementById("loanAmount").value) || 0;
+            const annualRate = Number(document.getElementById("loanRate").value) || 0;
+            const years = Number(document.getElementById("loanYears").value) || 0;
+            const prepayment = Number(document.getElementById("prepayment").value) || 0;
+
+            if (principal <= 0 || annualRate <= 0 || years <= 0) {
+                document.getElementById("emiMain").textContent = formatMoney(0);
+                document.getElementById("totalInterest").textContent = formatMoney(0);
+                document.getElementById("totalPayment").textContent = formatMoney(0);
+                document.getElementById("prepaymentSavings").textContent = formatMoney(0);
+                document.getElementById("tenureReduced").textContent = "0 Months";
+                renderChart("emiChart", ["Principal", "Total Interest"], [0, 0], ["#059669", "#0f172a"], emiChartInstance, (chart) => emiChartInstance = chart);
+                return;
+            }
+
+            const months = years * 12;
+            const monthlyRate = annualRate / 12 / 100;
+
+            let emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+
+            const totalPaymentBase = emi * months;
+            const totalInterestBase = totalPaymentBase - principal;
+
+            let balance = principal;
+            let actualMonths = 0;
+            let totalInterestWithPrepayment = 0;
+
+            if (prepayment > 0) {
+                while (balance > 0 && actualMonths < months) {
+                    let interestForMonth = balance * monthlyRate;
+                    let principalForMonth = (emi - interestForMonth) + prepayment;
+                    totalInterestWithPrepayment += interestForMonth;
+                    balance -= principalForMonth;
+                    actualMonths++;
+                }
+            } else {
+                actualMonths = months;
+                totalInterestWithPrepayment = totalInterestBase;
+            }
+
+            const savedInterest = totalInterestBase - totalInterestWithPrepayment;
+            const savedMonths = months - actualMonths;
+
+            document.getElementById("emiMain").textContent = formatMoney(emi);
+            document.getElementById("totalInterest").textContent = formatMoney(totalInterestWithPrepayment);
+            document.getElementById("totalPayment").textContent = formatMoney(principal + totalInterestWithPrepayment);
+            document.getElementById("prepaymentSavings").textContent = formatMoney(Math.max(0, savedInterest));
+            document.getElementById("tenureReduced").textContent = Math.max(0, savedMonths) + " Months";
+
+            renderChart("emiChart", ["Principal", "Total Interest"], [principal, totalInterestWithPrepayment], ["#059669", "#0f172a"], emiChartInstance, (chart) => emiChartInstance = chart);
+        }
+
+        // ================= FD CALCULATOR =================
+        function calculateFD() {
+            const principal = Number(document.getElementById("fdAmount").value) || 0;
+            const rate = Number(document.getElementById("fdRate").value) || 0;
+            const years = Number(document.getElementById("fdYears").value) || 0;
+            const inflationRate = Number(document.getElementById("fdInflation").value) || 0;
+
+            if (principal <= 0 || rate <= 0 || years <= 0) {
+                document.getElementById("fdMaturityMain").textContent = formatMoney(0);
+                document.getElementById("fdPrincipal").textContent = formatMoney(0);
+                document.getElementById("fdInterest").textContent = formatMoney(0);
+                document.getElementById("fdInflationAdjusted").textContent = formatMoney(0);
+                renderChart("fdChart", ["Principal Deposit", "Interest Earned"], [0, 0], ["#059669", "#34d399"], fdChartInstance, (chart) => fdChartInstance = chart);
+                return;
+            }
+
+            const maturity = principal * Math.pow(1 + rate / 100, years);
+            const interest = maturity - principal;
+            const adjustedValue = maturity / Math.pow(1 + inflationRate / 100, years);
+
+            document.getElementById("fdMaturityMain").textContent = formatMoney(maturity);
+            document.getElementById("fdPrincipal").textContent = formatMoney(principal);
+            document.getElementById("fdInterest").textContent = formatMoney(interest);
+            document.getElementById("fdInflationAdjusted").textContent = formatMoney(adjustedValue);
+
+            renderChart("fdChart", ["Principal Deposit", "Interest Earned"], [principal, interest], ["#059669", "#34d399"], fdChartInstance, (chart) => fdChartInstance = chart);
+        }
+
+        // ================= SAVINGS GOAL =================
+        function calculateSavingsGoal() {
+            const target = Number(document.getElementById("targetAmount").value) || 0;
+            const current = Number(document.getElementById("currentSavings").value) || 0;
+            const monthly = Number(document.getElementById("monthlySavings").value) || 0;
+
+            if (target <= 0 || monthly <= 0) {
+                document.getElementById("savingsTargetMain").textContent = "0 Months";
+                document.getElementById("remainingAmount").textContent = formatMoney(0);
+                document.getElementById("requiredMonths").textContent = "0 Months";
+                document.getElementById("requiredYears").textContent = "0 Years";
+                renderChart("savingsChart", ["Current Savings", "Remaining Balance"], [0, 0], ["#7c3aed", "#cbd5e1"], savingsChartInstance, (chart) => savingsChartInstance = chart);
+                return;
+            }
+
+            const remaining = Math.max(0, target - current);
+            const months = current >= target ? 0 : Math.ceil(remaining / monthly);
+            const years = (months / 12).toFixed(1);
+
+            document.getElementById("savingsTargetMain").textContent = months + " Months";
+            document.getElementById("remainingAmount").textContent = formatMoney(remaining);
+            document.getElementById("requiredMonths").textContent = months + " Months";
+            document.getElementById("requiredYears").textContent = current >= target ? "Goal Reached!" : years + " Years";
+
+            renderChart("savingsChart", ["Current Savings", "Remaining Balance"], [current, remaining], ["#7c3aed", "#cbd5e1"], savingsChartInstance, (chart) => savingsChartInstance = chart);
+        }
+
+        // ================= SIP CALCULATOR =================
+        function calculateSIP() {
+            const P = Number(document.getElementById("sipMonthly").value) || 0;
+            const annualRate = Number(document.getElementById("sipRate").value) || 0;
+            const years = Number(document.getElementById("sipYears").value) || 0;
+
+            if (P <= 0 || annualRate <= 0 || years <= 0) {
+                document.getElementById("sipMaturityMain").textContent = formatMoney(0);
+                document.getElementById("sipInvested").textContent = formatMoney(0);
+                document.getElementById("sipReturns").textContent = formatMoney(0);
+                document.getElementById("sipTotal").textContent = formatMoney(0);
+                renderChart("sipChart", ["Amount Invested", "Est. Wealth Gain"], [0, 0], ["#0f172a", "#059669"], sipChartInstance, (chart) => sipChartInstance = chart);
+                return;
+            }
+
+            const i = annualRate / 12 / 100;
+            const n = years * 12;
+
+            const totalValue = P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
+            const investedAmount = P * n;
+            const estimatedReturns = totalValue - investedAmount;
+
+            document.getElementById("sipMaturityMain").textContent = formatMoney(totalValue);
+            document.getElementById("sipInvested").textContent = formatMoney(investedAmount);
+            document.getElementById("sipReturns").textContent = formatMoney(estimatedReturns);
+            document.getElementById("sipTotal").textContent = formatMoney(totalValue);
+
+            renderChart("sipChart", ["Amount Invested", "Est. Wealth Gain"], [investedAmount, estimatedReturns], ["#0f172a", "#059669"], sipChartInstance, (chart) => sipChartInstance = chart);
+        }
+
+        // ================= EMERGENCY FUND PLANNER =================
+        function calculateEmergencyFund() {
+            const expense = Number(document.getElementById("emergencyExpense").value) || 0;
+            const months = Number(document.getElementById("emergencyMonths").value) || 0;
+            const current = Number(document.getElementById("emergencyCurrent").value) || 0;
+
+            if (expense <= 0) {
+                document.getElementById("emergencyTargetMain").textContent = formatMoney(0);
+                document.getElementById("emergencyTotalReq").textContent = formatMoney(0);
+                document.getElementById("emergencyCurrentVal").textContent = formatMoney(0);
+                document.getElementById("emergencyDeficit").textContent = formatMoney(0);
+                renderChart("emergencyChart", ["Current Reserve", "Fund Deficit"], [0, 0], ["#d97706", "#cbd5e1"], emergencyChartInstance, (chart) => emergencyChartInstance = chart);
+                return;
+            }
+
+            const requiredFund = expense * months;
+            const deficit = Math.max(0, requiredFund - current);
+
+            document.getElementById("emergencyTargetMain").textContent = formatMoney(requiredFund);
+            document.getElementById("emergencyTotalReq").textContent = formatMoney(requiredFund);
+            document.getElementById("emergencyCurrentVal").textContent = formatMoney(current);
+            document.getElementById("emergencyDeficit").textContent = formatMoney(deficit);
+
+            renderChart("emergencyChart", ["Current Reserve", "Fund Deficit"], [Math.min(current, requiredFund), deficit], ["#d97706", "#cbd5e1"], emergencyChartInstance, (chart) => emergencyChartInstance = chart);
+        }
+
+        // ================= RETIREMENT / FIRE CALCULATOR =================
+        function calculateFIRE() {
+            const currentAge = Number(document.getElementById("fireCurrentAge").value) || 0;
+            const retireAge = Number(document.getElementById("fireRetireAge").value) || 0;
+            const currentMonthly = Number(document.getElementById("fireSpending").value) || 0;
+            const inflation = Number(document.getElementById("fireInflation").value) || 0;
+
+            if (retireAge <= currentAge || currentMonthly <= 0) {
+                document.getElementById("fireCorpusMain").textContent = formatMoney(0);
+                document.getElementById("fireYearsToRetire").textContent = "0 Years";
+                document.getElementById("fireFutureMonthly").textContent = formatMoney(0);
+                document.getElementById("fireCorpus").textContent = formatMoney(0);
+                renderChart("fireChart", ["Today Monthly Spending", "Future Inflation Gap"], [0, 0], ["#7c3aed", "#34d399"], fireChartInstance, (chart) => fireChartInstance = chart);
+                return;
+            }
+
+            const yearsToRetire = retireAge - currentAge;
+            const futureMonthlySpending = currentMonthly * Math.pow(1 + inflation / 100, yearsToRetire);
+            const futureAnnualSpending = futureMonthlySpending * 12;
+
+            const targetCorpus = futureAnnualSpending * 25;
+
+            document.getElementById("fireCorpusMain").textContent = formatMoney(targetCorpus);
+            document.getElementById("fireYearsToRetire").textContent = yearsToRetire + " Years";
+            document.getElementById("fireFutureMonthly").textContent = formatMoney(futureMonthlySpending);
+            document.getElementById("fireCorpus").textContent = formatMoney(targetCorpus);
+
+            renderChart("fireChart", ["Today Monthly Spending", "Future Inflation Gap"], [currentMonthly, Math.max(0, futureMonthlySpending - currentMonthly)], ["#7c3aed", "#34d399"], fireChartInstance, (chart) => fireChartInstance = chart);
+        }
+
+        // ================= RENDER CHART =================
+        function renderChart(canvasId, labels, data, colors, instance, setInstance) {
+            const ctx = document.getElementById(canvasId).getContext("2d");
+            if (instance) instance.destroy();
+
+            const newChart = new Chart(ctx, {
+                type: "doughnut",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: "#ffffff"
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { position: "bottom" }
+                    }
+                }
+            });
+
+            setInstance(newChart);
+        }
+
+        // ================= EXPORT PDF =================
+        function exportPDF(elementId) {
+            const { jsPDF } = window.jspdf;
+            const target = document.getElementById(elementId);
+
+            html2canvas(target).then((canvas) => {
+                const imgData = canvas.toDataURL("image/png");
+                const pdf = new jsPDF("p", "mm", "a4");
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth() - 20;
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                pdf.setFontSize(18);
+                pdf.text("FinTrack - Calculation Report", 10, 15);
+                pdf.addImage(imgData, "PNG", 10, 25, pdfWidth, pdfHeight);
+                pdf.save(`${elementId}-summary.pdf`);
+            });
+        }
+    </script>
+</body>
+
+</html>
